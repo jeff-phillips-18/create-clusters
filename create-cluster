@@ -49,7 +49,7 @@ done
 INSTALL_DIR=${INSTALL_DIR:=$OS_CLUSTERS_BASE_DIR/clusters/cluster-manual}${VERSION_SUFFIX}${DIR_SUFFIX}
 INSTALL_CONFIG_TEMPLATE_FILE=${INSTALL_CONFIG_TEMPLATE_FILE:=$OS_CLUSTERS_BASE_DIR/install-config-template.yaml}
 
-INSTALL_VERSION=${INSTALL_VERSION:=4.10}
+INSTALL_VERSION=${INSTALL_VERSION:=4.11}
 INSTALL_FILE=${INSTALL_FILE:=latest-$INSTALL_VERSION}
 
 echo ======== Installing: ${INSTALL_FILE} to ${INSTALL_DIR} ==============
@@ -107,9 +107,9 @@ echo "$(date)" "Installing to directory $INSTALL_DIR"
 
 ./openshift-install create cluster --dir "$INSTALL_DIR"
 
-oc patch clusterversion/version --patch '{"spec":{"upstream":"https://openshift-release.apps.ci.l2s4.p1.openshiftapps.com/graph"}}' --type=merge --config "$INSTALL_DIR/auth/kubeconfig"
+oc patch clusterversion/version --patch '{"spec":{"upstream":"https://openshift-release.apps.ci.l2s4.p1.openshiftapps.com/graph"}}' --type=merge --kubeconfig "$INSTALL_DIR/auth/kubeconfig"
 
-machinesets=($(oc get machinesets -n openshift-machine-api -o name --config "$INSTALL_DIR/auth/kubeconfig"))
+machinesets=($(oc get machinesets -n openshift-machine-api -o name --kubeconfig "$INSTALL_DIR/auth/kubeconfig"))
 
 # If we've got no labeled buildconfigs, return
 if [ "${#machinesets[@]}" -eq 0 ]; then
@@ -121,18 +121,18 @@ else
         name="${name##*/}"
 
         echo Scaling up "${name}"
-        oc scale --replicas=2 machineset "${name}" -n openshift-machine-api --config "$INSTALL_DIR/auth/kubeconfig"
+        oc scale --replicas=2 machineset "${name}" -n openshift-machine-api --kubeconfig "$INSTALL_DIR/auth/kubeconfig"
     done
 fi
 
 notify "Install Complete!" "Cluster succesfully created"
 
 echo ""
-oc --config "$INSTALL_DIR/auth/kubeconfig" version | grep Server
+oc --kubeconfig "$INSTALL_DIR/auth/kubeconfig" version | grep Server
 echo ""
-echo "Web Console: $(oc --config "$INSTALL_DIR/auth/kubeconfig" whoami --show-console)"
+echo "Web Console: $(oc --kubeconfig "$INSTALL_DIR/auth/kubeconfig" whoami --show-console)"
 echo "Login: kubeadmin / $(cat "$INSTALL_DIR/auth/kubeadmin-password")"
 echo ""
-echo "oc login $(oc --config "$INSTALL_DIR/auth/kubeconfig" whoami --show-server) -u kubeadmin -p $(cat "$INSTALL_DIR/auth/kubeadmin-password")"
+echo "oc login $(oc --kubeconfig "$INSTALL_DIR/auth/kubeconfig" whoami --show-server) -u kubeadmin -p $(cat "$INSTALL_DIR/auth/kubeadmin-password")"
 echo ""
 
