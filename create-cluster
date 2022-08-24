@@ -13,8 +13,8 @@ key="$1"
 
 case $key in
     -v|--version)
-    INSTALL_VERSION="$2"
-    VERSION_SUFFIX="-$2"
+    INSTALL_VERSION="latest-$2"
+    INSTALL_FILE=${INSTALL_FILE:=latest-$INSTALL_VERSION}
     shift # past argument
     shift # past value
     ;;
@@ -46,13 +46,13 @@ done
 
 # set -euxo pipefail
 
-INSTALL_DIR=${INSTALL_DIR:=$OS_CLUSTERS_BASE_DIR/clusters/cluster-manual}${VERSION_SUFFIX}${DIR_SUFFIX}
+INSTALL_VERSION=${INSTALL_VERSION:=latest}
+INSTALL_FILE=${INSTALL_FILE:=latest}
+
+INSTALL_DIR=${INSTALL_DIR:=$OS_CLUSTERS_BASE_DIR/clusters/cluster-manual}-${INSTALL_VERSION}${DIR_SUFFIX}
 INSTALL_CONFIG_TEMPLATE_FILE=${INSTALL_CONFIG_TEMPLATE_FILE:=$OS_CLUSTERS_BASE_DIR/install-config-template.yaml}
 
-INSTALL_VERSION=${INSTALL_VERSION:=4.11}
-INSTALL_FILE=${INSTALL_FILE:=latest-$INSTALL_VERSION}
-
-echo ======== Installing: ${INSTALL_FILE} to ${INSTALL_DIR} ==============
+echo ======== Installing: ${INSTALL_FILE} to "${INSTALL_DIR}" ==============
 sleep 5
 echo ...
 
@@ -65,7 +65,7 @@ function notify() {
 
 function failed() {
 	notify "Install Failed" "An error occurred creating the cluster"
-	exit -1
+	exit
 }
 trap failed ERR
 
