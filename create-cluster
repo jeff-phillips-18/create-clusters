@@ -14,7 +14,7 @@ key="$1"
 case $key in
     -v|--version)
     INSTALL_VERSION="latest-$2"
-    INSTALL_FILE=${INSTALL_FILE:=latest-$INSTALL_VERSION}
+    INSTALL_FILE=${INSTALL_FILE:=$INSTALL_VERSION}
     shift # past argument
     shift # past value
     ;;
